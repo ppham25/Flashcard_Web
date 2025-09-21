@@ -1,0 +1,5 @@
+com\mycompany\englishflascard\JakartaRestConfiguration.class
+com\mycompany\englishflascard\Flashcard.class
+com\mycompany\englishflascard\FlashcardService.class
+com\mycompany\englishflascard\FlashcardController.class
+com\mycompany\englishflascard\resources\JakartaEE11Resource.class

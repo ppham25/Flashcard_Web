@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Flashcards - Learn English Vocabulary</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>English Flashcards</h1>
+            <p>Learn English vocabulary effectively with interactive flashcards</p>
+        </header>
+        
+        <main>
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="front">
+                        <h2 id="word">Welcome!</h2>
+                        <p class="instruction">Click to flip the card</p>
+                    </div>
+                    <div class="back">
+                        <h2 id="meaning">Chào mừng!</h2>
+                        <p id="example">Welcome to our English learning application</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="prev-btn" class="control-btn">Previous</button>
+                <button id="flip-btn" class="control-btn">Flip Card</button>
+                <button id="next-btn" class="control-btn">Next</button>
+            </div>
+            
+            <div class="progress">
+                <span id="current">0</span> / <span id="total">0</span> cards
+            </div>
+            
+            <div class="add-card-section">
+                <h3>Add New Flashcard</h3>
+                <form id="add-form">
+                    <div class="form-group">
+                        <label for="new-word">English Word:</label>
+                        <input type="text" id="new-word" placeholder="Enter English word" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-meaning">Vietnamese Meaning:</label>
+                        <input type="text" id="new-meaning" placeholder="Enter Vietnamese meaning" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-example">Example Sentence (optional):</label>
+                        <input type="text" id="new-example" placeholder="Enter example sentence">
+                    </div>
+                    <button type="submit" class="submit-btn">Add Flashcard</button>
+                </form>
+            </div>
+        </main>
+        
+        <footer>
+            <p>English Flashcards App &copy; 2023 - Learn English Vocabulary</p>
+        </footer>
+    </div>
+    
+    <script src="js/script.js"></script>
+</body>
+</html>
