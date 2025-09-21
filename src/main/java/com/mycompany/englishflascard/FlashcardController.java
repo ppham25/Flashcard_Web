@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.englishflascard;
 
-/**
- *
- * @author Admin
- */
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet("/api/flashcards/*")
+@WebServlet(name = "FlashcardController", urlPatterns = {"/api/flashcards/*"})
 public class FlashcardController extends HttpServlet {
     private final FlashcardService flashcardService = new FlashcardService();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -25,14 +17,12 @@ public class FlashcardController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
         PrintWriter out = response.getWriter();
 
         String pathInfo = request.getPathInfo();
 
         if (pathInfo == null || pathInfo.equals("/")) {
-            // Lấy tất cả flashcards
             out.print(objectMapper.writeValueAsString(flashcardService.getAllFlashcards()));
         } else {
             try {
@@ -55,8 +45,7 @@ public class FlashcardController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
         PrintWriter out = response.getWriter();
 
         try {
@@ -74,8 +63,7 @@ public class FlashcardController extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
         PrintWriter out = response.getWriter();
 
         String pathInfo = request.getPathInfo();
@@ -104,8 +92,7 @@ public class FlashcardController extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
         PrintWriter out = response.getWriter();
 
         String pathInfo = request.getPathInfo();
@@ -129,5 +116,19 @@ public class FlashcardController extends HttpServlet {
         }
         out.flush();
     }
-}
 
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        setupResponse(response);
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void setupResponse(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+    }
+}

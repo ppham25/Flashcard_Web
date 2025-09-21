@@ -7,8 +7,11 @@
     
     <display-name>English Flashcard Application</display-name>
     
-   
-    
+  
+    <servlet-mapping>
+        <servlet-name>FlashcardController</servlet-name>
+        <url-pattern>/api/flashcards/*</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

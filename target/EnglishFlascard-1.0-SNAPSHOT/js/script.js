@@ -1,8 +1,6 @@
 /* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
+ * Flashcard App - JavaScript
  */
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const flashcard = document.getElementById('flashcard');
@@ -16,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const flipBtn = document.getElementById('flip-btn');
     const addForm = document.getElementById('add-form');
     
+    // QUAN TRỌNG: SỬA BASE_URL THÀNH http://localhost:8080
+    const BASE_URL = 'http://localhost:8080';
+    const API_URL = BASE_URL + '/api/flashcards';
+    
     let flashcards = [];
     let currentIndex = 0;
     
@@ -23,31 +25,37 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadFlashcards() {
         try {
             showLoading();
-            const response = await fetch('/EnglishFlascard-1.0-SNAPSHOT/api/flashcards');
+            console.log('Loading flashcards from:', API_URL);
+            
+            const response = await fetch(API_URL);
+            console.log('Response status:', response.status);
+            
             if (response.ok) {
                 flashcards = await response.json();
+                console.log('Loaded', flashcards.length, 'flashcards');
+                
                 if (flashcards.length > 0) {
                     updateFlashcard();
                     updateProgress();
                 } else {
-                    // Nếu không có thẻ nào, hiển thị thông báo
                     wordElement.textContent = "No flashcards available";
                     meaningElement.textContent = "Hãy thêm thẻ mới";
                     exampleElement.textContent = "Use the form below to add your first flashcard";
                 }
             } else {
-                showError('Failed to load flashcards from server');
+                console.error('Server returned error:', response.status);
+                showError('Failed to load flashcards from server. Status: ' + response.status);
+                loadSampleData();
             }
         } catch (error) {
             console.error('Error:', error);
-            showError('Cannot connect to server. Using sample data.');
+            showError('Cannot connect to server. Using sample data. Error: ' + error.message);
             loadSampleData();
         } finally {
             hideLoading();
         }
     }
     
-    // Tải dữ liệu mẫu nếu kết nối server thất bại
     function loadSampleData() {
         flashcards = [
             {id: 1, word: "Hello", meaning: "Xin chào", example: "Hello, how are you?"},
@@ -58,26 +66,21 @@ document.addEventListener('DOMContentLoaded', function() {
         updateProgress();
     }
     
-    // Cập nhật nội dung flashcard hiện tại
     function updateFlashcard() {
         if (flashcards.length > 0 && currentIndex < flashcards.length) {
             const currentCard = flashcards[currentIndex];
             wordElement.textContent = currentCard.word;
             meaningElement.textContent = currentCard.meaning;
             exampleElement.textContent = currentCard.example || '';
-            
-            // Đảm bảo flashcard hiển thị mặt trước
             flashcard.classList.remove('flipped');
         }
     }
     
-    // Cập nhật chỉ số progress
     function updateProgress() {
         currentElement.textContent = currentIndex + 1;
         totalElement.textContent = flashcards.length;
     }
     
-    // Chuyển đến flashcard trước
     function prevFlashcard() {
         if (currentIndex > 0) {
             currentIndex--;
@@ -86,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Chuyển đến flashcard tiếp theo
     function nextFlashcard() {
         if (currentIndex < flashcards.length - 1) {
             currentIndex++;
@@ -95,12 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Lật flashcard
     function flipFlashcard() {
         flashcard.classList.toggle('flipped');
     }
     
-    // Thêm flashcard mới
     async function addFlashcard(event) {
         event.preventDefault();
         
@@ -108,69 +108,85 @@ document.addEventListener('DOMContentLoaded', function() {
         const newMeaning = document.getElementById('new-meaning').value;
         const newExample = document.getElementById('new-example').value;
         
+        if (!newWord.trim() || !newMeaning.trim()) {
+            showError('Please enter both word and meaning');
+            return;
+        }
+        
         const newCard = {
-            word: newWord,
-            meaning: newMeaning,
-            example: newExample
+            word: newWord.trim(),
+            meaning: newMeaning.trim(),
+            example: newExample.trim()
         };
         
         try {
             showLoading();
-            const response = await fetch('/EnglishFlascard-1.0-SNAPSHOT/api/flashcards', {
+            console.log('Adding new card to:', API_URL);
+            console.log('Request data:', newCard);
+            
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(newCard)
             });
             
+            console.log('Add response status:', response.status);
+            console.log('Response headers:', Object.fromEntries([...response.headers]));
+            
             if (response.ok) {
-                // Làm mới danh sách flashcards
+                const addedCard = await response.json();
+                console.log('Added successfully:', addedCard);
+                
                 await loadFlashcards();
-                // Reset form
                 addForm.reset();
                 showSuccess('Flashcard added successfully!');
                 
-                // Chuyển đến thẻ vừa thêm
                 currentIndex = flashcards.length - 1;
                 updateFlashcard();
                 updateProgress();
             } else {
-                showError('Error adding flashcard. Please try again.');
+                let errorText;
+                try {
+                    errorText = await response.text();
+                } catch (e) {
+                    errorText = 'Cannot read error response';
+                }
+                console.error('Server error details:', errorText);
+                showError('Error adding flashcard. Status: ' + response.status + '. ' + errorText);
             }
         } catch (error) {
-            console.error('Error:', error);
-            showError('Cannot connect to server. Flashcard saved locally only.');
+            console.error('Network error details:', error);
+            showError('Cannot connect to server: ' + error.message);
             
-            // Lưu cục bộ nếu không kết nối được server
+            // Fallback: save locally
             newCard.id = flashcards.length > 0 ? Math.max(...flashcards.map(c => c.id)) + 1 : 1;
             flashcards.push(newCard);
             updateFlashcard();
             updateProgress();
             addForm.reset();
+            showSuccess('Flashcard saved locally (no server connection)');
         } finally {
             hideLoading();
         }
     }
     
-    // Hiển thị thông báo tải
     function showLoading() {
-        // Có thể thêm hiệu ứng loading nếu muốn
+        document.body.style.cursor = 'wait';
     }
     
-    // Ẩn thông báo tải
     function hideLoading() {
-        // Ẩn hiệu ứng loading
+        document.body.style.cursor = 'default';
     }
     
-    // Hiển thị thông báo lỗi
     function showError(message) {
-        alert('Error: ' + message);
+        alert('❌ Error: ' + message);
     }
     
-    // Hiển thị thông báo thành công
     function showSuccess(message) {
-        alert('Success: ' + message);
+        alert('✅ Success: ' + message);
     }
     
     // Gán sự kiện

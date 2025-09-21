@@ -1,60 +1,40 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.englishflascard;
 
-/**
- *
- * @author Admin
- */
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FlashcardService {
-    private static List<Flashcard> flashcards = new ArrayList<>();
-    private static int nextId = 1;
-    
-    static {
-        // Thêm một số flashcard mẫu
-        flashcards.add(new Flashcard(nextId++, "Hello", "Xin chào", "Hello, how are you?"));
-        flashcards.add(new Flashcard(nextId++, "Goodbye", "Tạm biệt", "Goodbye, see you tomorrow!"));
-        flashcards.add(new Flashcard(nextId++, "Thank you", "Cảm ơn", "Thank you for your help."));
-        flashcards.add(new Flashcard(nextId++, "Please", "Làm ơn", "Please give me that book."));
-        flashcards.add(new Flashcard(nextId++, "Sorry", "Xin lỗi", "I'm sorry for being late."));
-    }
-    
+    private final List<Flashcard> flashcards = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicInteger counter = new AtomicInteger(1);
+
     public List<Flashcard> getAllFlashcards() {
-        return new ArrayList<>(flashcards);
+        return flashcards;
     }
-    
+
     public Flashcard getFlashcardById(int id) {
-        for (Flashcard card : flashcards) {
-            if (card.getId() == id) {
-                return card;
-            }
-        }
-        return null;
+        return flashcards.stream()
+                .filter(c -> c.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
-    
-    public void addFlashcard(Flashcard flashcard) {
-        flashcard.setId(nextId++);
-        flashcards.add(flashcard);
+
+    public void addFlashcard(Flashcard card) {
+        card.setId(counter.getAndIncrement());
+        flashcards.add(card);
     }
-    
-    public boolean updateFlashcard(int id, Flashcard updatedFlashcard) {
+
+    public boolean updateFlashcard(int id, Flashcard updatedCard) {
         for (int i = 0; i < flashcards.size(); i++) {
             if (flashcards.get(i).getId() == id) {
-                updatedFlashcard.setId(id);
-                flashcards.set(i, updatedFlashcard);
+                updatedCard.setId(id);
+                flashcards.set(i, updatedCard);
                 return true;
             }
         }
         return false;
     }
-    
+
     public boolean deleteFlashcard(int id) {
-        return flashcards.removeIf(card -> card.getId() == id);
+        return flashcards.removeIf(c -> c.getId() == id);
     }
 }
